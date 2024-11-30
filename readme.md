@@ -20,8 +20,8 @@ local Tab = Window:NewTab({
 
 #### Edit/Remove A Tab
 ```lua
-Tab:Edit("New Name")
-Tab:Remove()
+Tab:Edit("New Name") -- Changes the text to the new text
+Tab:Remove() -- Removes the tab
 ```
 
 ### Create A Label
@@ -33,8 +33,8 @@ local Label = Tab:NewLabel({
 
 #### Edit/Remove A Label
 ```lua
-Label:Edit("New Name")
-Label:Remove()
+Label:Edit("New Name") -- Changes the text to the new text
+Label:Remove() -- Removes the label
 ```
 
 ### Create A Button
@@ -55,5 +55,5 @@ Button:Edit({
         
     end
 })
-Button:Remove()
+Button:Remove() -- Removes the button
 ```
