@@ -7,7 +7,7 @@ local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/lvvyh
 local Window = library:NewWindow({
 	Name = "Test Window", -- Name of the window | string
 	Keybind = "LeftControl", -- Keybind to open/close window | string
-	UseCoreGui = false -- use coregui as the parent | bool
+	UseCoreGui = true -- use coregui as the parent | bool
 })
 ```
 
