@@ -18,7 +18,7 @@ local Tab = Window:NewTab({
 })
 ```
 
-### Edit/Remove A Tab
+#### Edit/Remove A Tab
 ```lua
 Tab:Edit("New Name")
 Tab:Remove()
@@ -31,8 +31,18 @@ local Label = Tab:NewLabel({
 })
 ```
 
-### Edit/Remove A Label
+#### Edit/Remove A Label
 ```lua
 Label:Edit("New Name")
 Label:Remove()
+```
+
+### Create A Button
+```lua
+local Button = Tab:NewButton({
+	Name = "Example Button",
+	Callback = function()
+		
+	end
+})
 ```
