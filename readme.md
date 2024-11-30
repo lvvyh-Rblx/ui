@@ -13,7 +13,7 @@ local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/lvvyh
 
 ### Create A Window
 ```lua
-local Window = library:NewWindow({
+local Window = Library:NewWindow({
 	Name = "Test Window", -- Name of the window | string
 	Keybind = "LeftControl", -- Keybind to open/close window | string
 	UseCoreGui = true -- Use coregui as the parent | bool
