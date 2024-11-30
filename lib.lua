@@ -32,7 +32,7 @@ function library:NewWindow(settings)
 	}
 	
 	-- Create the ScreenGui
-	local parent = settings.UseCoreGui and game:GetService("CoreGui") or Players.LocalPlayer:WaitForChild("PlayerGui")
+	local parent = settings.UseCoreGui and gethui() or Players.LocalPlayer:WaitForChild("PlayerGui")
 	local screenGui = Instance.new("ScreenGui")
 	screenGui.Name = Http:GenerateGUID()
 	screenGui.IgnoreGuiInset = true
