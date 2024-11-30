@@ -18,8 +18,21 @@ local Tab = Window:NewTab({
 })
 ```
 
-#### Edit/Remove A Tab 
+### Edit/Remove A Tab
 ```lua
 Tab:Edit("New Name")
 Tab:Remove()
+```
+
+### Create A Label
+```lua
+local Label = Tab:NewLabel({
+	Name = "Example Label"
+})
+```
+
+### Edit/Remove A Label
+```lua
+Label:Edit("New Name")
+Label:Remove()
 ```
