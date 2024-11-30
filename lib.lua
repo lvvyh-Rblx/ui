@@ -2,6 +2,7 @@ local Players = game:GetService("Players")
 local Http = game:GetService("HttpService")
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
+local StarterGui = game:GetService("StarterGui")
 local player = Players.LocalPlayer
 
 local ranks = {
@@ -353,7 +354,7 @@ function library:NewWindow(settings)
 		minButton.Visible = true
 	end)
 	
-	-- Add toggle functionality for the keybind
+	-- Add functionality for the keybind
 	local keybind = settings.Keybind
 	UserInputService.InputBegan:Connect(function(input, gameProcessed)
 		if gameProcessed then return end
@@ -362,6 +363,23 @@ function library:NewWindow(settings)
 			screenGui.Enabled = visible
 		end
 	end)
+	
+	-- Notification function
+	function window:Notify(notificationSettings)
+		notificationSettings = notificationSettings or {}
+		
+		local title = notificationSettings.Name or "Title"
+		local description = notificationSettings.Description or ""
+		local icon = notificationSettings.Icon or ""
+		local duration = notificationSettings.Duration or 3
+		
+		StarterGui:SetCore("SendNotification", {
+			Title = title,
+			Text = description,
+			Icon = icon,
+			Duration = duration
+		})
+	end
 	
 	-- Function to create a new tab
 	function window:NewTab(tabSettings)
@@ -676,7 +694,6 @@ function library:NewWindow(settings)
 	table.insert(library.Windows, window)
 	return window
 end
-
 
 
 return library
