@@ -329,5 +329,4 @@ function library:NewWindow(settings)
 end
 
 
-
 return library
