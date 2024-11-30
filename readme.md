@@ -46,3 +46,14 @@ local Button = Tab:NewButton({
 	end
 })
 ```
+
+#### Edit/Remove A Button
+```lua
+Button:Edit({
+    Name = "New Name", -- optional
+    Callback = function() -- optional
+        
+    end
+})
+Button:Remove()
+```
