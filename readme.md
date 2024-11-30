@@ -5,16 +5,16 @@ local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/lvvyh
 ### Create A Window
 ```lua
 local Window = library:NewWindow({
-	Name = "Test Window", -- Name of the window | string
-	Keybind = "LeftControl", -- Keybind to open/close window | string
-	UseCoreGui = true -- use coregui as the parent | bool
+	Name = "Test Window", -- Name of the window | string, required
+	Keybind = "LeftControl", -- Keybind to open/close window | string, required
+	UseCoreGui = true -- Use coregui as the parent | bool, optional
 })
 ```
 
 ### Create A Tab
 ```lua
 local Tab = Window:NewTab({
-	Name = "Tab Name" -- Name of the tab | string
+	Name = "Tab Name" -- Name of the tab | string, required
 })
 ```
 
@@ -27,7 +27,7 @@ Tab:Remove()
 ### Create A Label
 ```lua
 local Label = Tab:NewLabel({
-	Name = "Example Label"
+	Name = "Example Label" -- Text to show on the label | string, required
 })
 ```
 
@@ -40,8 +40,8 @@ Label:Remove()
 ### Create A Button
 ```lua
 local Button = Tab:NewButton({
-	Name = "Example Button",
-	Callback = function()
+	Name = "Example Button", -- Text that shows on the button | string, required
+	Callback = function() -- Code executed when the button is clicked | function, optional
 		
 	end
 })
@@ -50,8 +50,8 @@ local Button = Tab:NewButton({
 #### Edit/Remove A Button
 ```lua
 Button:Edit({
-    Name = "New Name", -- optional
-    Callback = function() -- optional
+    Name = "New Name", -- New name for the button | string, optional
+    Callback = function() -- New callback for the button | string, optional
         
     end
 })
