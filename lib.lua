@@ -55,6 +55,7 @@ function library:NewWindow(settings)
 	local line = Instance.new("Frame", windowFrame)
 	local tabList = Instance.new("ScrollingFrame", windowFrame)
 	local tabLayout = Instance.new("UIListLayout", tabList)
+	local tabWindowsFolder = Instance.new("Folder", windowFrame)
 	
 	-- Set Properties for window
 	windowFrame.Name = "Window"
@@ -109,6 +110,8 @@ function library:NewWindow(settings)
 	title.TextColor3 = Color3.fromRGB(230, 230, 230)
 	title.TextScaled = true
 	title.TextXAlignment = Enum.TextXAlignment.Left
+	
+	tabWindowsFolder.Name = "Windows"
 	
 	windowCorner.CornerRadius = UDim.new(0.065, 0)
 	barCorner.CornerRadius = UDim.new(0.45, 0)
@@ -217,6 +220,8 @@ function library:NewWindow(settings)
 		local tabTitle = Instance.new("TextLabel", tabFrame)
 		local tabButton = Instance.new("TextButton", tabFrame)
 		local tabTitleConstraint = Instance.new("UITextSizeConstraint", tabTitle)
+		local tabWindow = Instance.new("ScrollingFrame", tabWindowsFolder)
+		local tabWindowLayout = Instance.new("UIListLayout", tabWindow)
 		
 		-- Set tab properties
 		tabFrame.Name = tabName
@@ -237,11 +242,33 @@ function library:NewWindow(settings)
 		tabButton.Size = UDim2.new(1, 0, 1, 0)
 		tabButton.Text = ""
 		
+		tabWindow.Name = tabName
+		tabWindow.BackgroundTransparency = 1
+		tabWindow.Position = UDim2.new(0.293, 0, 0.135, 0)
+		tabWindow.Size = UDim2.new(0.698, 0, 0.865, 0)
+		tabWindow.AutomaticCanvasSize = Enum.AutomaticSize.Y
+		tabWindow.CanvasSize = UDim2.new(0, 0, 0.9, 0)
+		tabWindow.ScrollBarThickness = 0
+		tabWindow.Visible = false
+		
 		tabCorner.CornerRadius = UDim.new(0.15, 0)
 		tabAspect.AspectRatio = 2.892
 		tabTitleConstraint.MaxTextSize = 40
 		tabTitleConstraint.MinTextSize = 1
+		tabWindowLayout.Padding = UDim.new(0, 10)
 		
+		-- Tab button functionality
+		tabButton.MouseButton1Click:Connect(function()
+			for _, v in pairs(tabWindowsFolder:GetChildren()) do
+				if v.Name ~= tabName then
+					v.Visible = false
+				else
+					v.Visible = true
+				end
+			end
+		end)
+		
+		-- Tab functions
 		function tab:Remove()
 			tabFrame:Destroy()
 		end
@@ -249,6 +276,48 @@ function library:NewWindow(settings)
 		function tab:Edit(newName)
 			newName = newName or "Tab"
 			tabTitle.Text = newName
+		end
+		
+		-- New label function
+		function tab:NewLabel(labelSettings)
+			local label = {}
+			
+			labelSettings = labelSettings or {}
+			local labelName = labelSettings.Name or "Label"
+			
+			-- Create label instances
+			local labelFrame = Instance.new("Frame", tabWindow)
+			local labelText = Instance.new("TextLabel", labelFrame)
+			local labelAspect = Instance.new("UIAspectRatioConstraint", labelFrame)
+			local labelConstraint = Instance.new("UITextSizeConstraint", labelText)
+			
+			-- Set label properties
+			labelFrame.Name = "Label"
+			labelFrame.BackgroundTransparency = 1
+			labelFrame.Size = UDim2.new(1, 0, 0, 41)
+			
+			labelText.Name = "LabelText"
+			labelText.BackgroundTransparency = 1
+			labelText.Size = UDim2.new(1, 0, 1, 0)
+			labelText.Text = labelName
+			labelText.TextScaled = true
+			labelText.TextColor3 = Color3.fromRGB(221, 212, 225)
+			
+			labelAspect.AspectRatio = 12.588
+			labelConstraint.MaxTextSize = 42
+			labelConstraint.MinTextSize = 1
+			
+			-- Label functions
+			function label:Edit(newText)
+				newText = newText or "Label"
+				labelText.Text = newText
+			end
+			
+			function label:Remove()
+				labelFrame:Destroy()
+			end
+			
+			return label
 		end
 		
 		return tab
