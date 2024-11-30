@@ -66,7 +66,7 @@ function library:NewWindow(settings)
 	line.Name = "Line"
 	line.BackgroundColor3 = Color3.fromRGB(75, 43, 156)
 	line.Position = UDim2.new(0.276, 0, 0.05, 0)
-	line.Size = UDim2.new(0.005, 0, .95, 0)
+	line.Size = UDim2.new(0.0075, 0, .95, 0)
 	line.BorderSizePixel = 0
 	
 	tabList.Name = "TabList"
@@ -212,6 +212,7 @@ function library:NewWindow(settings)
 		
 		tabSettings = tabSettings or {}
 		local tabName = tabSettings.Name or "Tab"
+		local tabOrder = 0
 		
 		-- Create tab instances
 		local tabFrame = Instance.new("Frame", tabList)
@@ -222,6 +223,7 @@ function library:NewWindow(settings)
 		local tabTitleConstraint = Instance.new("UITextSizeConstraint", tabTitle)
 		local tabWindow = Instance.new("ScrollingFrame", tabWindowsFolder)
 		local tabWindowLayout = Instance.new("UIListLayout", tabWindow)
+		local tabWindowPadding = Instance.new("UIPadding", tabWindow)
 		
 		-- Set tab properties
 		tabFrame.Name = tabName
@@ -256,6 +258,8 @@ function library:NewWindow(settings)
 		tabTitleConstraint.MaxTextSize = 40
 		tabTitleConstraint.MinTextSize = 1
 		tabWindowLayout.Padding = UDim.new(0, 10)
+		tabWindowLayout.SortOrder = Enum.SortOrder.LayoutOrder
+		tabWindowPadding.PaddingLeft = UDim.new(0.013, 0)
 		
 		-- Tab button functionality
 		tabButton.MouseButton1Click:Connect(function()
@@ -280,6 +284,7 @@ function library:NewWindow(settings)
 		
 		-- New label function
 		function tab:NewLabel(labelSettings)
+			tabOrder += 1
 			local label = {}
 			
 			labelSettings = labelSettings or {}
@@ -295,6 +300,7 @@ function library:NewWindow(settings)
 			labelFrame.Name = "Label"
 			labelFrame.BackgroundTransparency = 1
 			labelFrame.Size = UDim2.new(1, 0, 0, 41)
+			labelFrame.LayoutOrder = tabOrder
 			
 			labelText.Name = "LabelText"
 			labelText.BackgroundTransparency = 1
@@ -316,8 +322,90 @@ function library:NewWindow(settings)
 			function label:Remove()
 				labelFrame:Destroy()
 			end
-			
+						
 			return label
+		end
+		
+		-- New button function
+		function tab:NewButton(buttonSettings)
+			tabOrder += 1
+			local button = {}
+			
+			buttonSettings = buttonSettings or {}
+			local buttonName = buttonSettings.Name or "Button"
+			local callback = buttonSettings.Callback or function() end
+			
+			-- Create button instances
+			local buttonFrame = Instance.new("Frame", tabWindow)
+			local buttonAspect = Instance.new("UIAspectRatioConstraint", buttonFrame)
+			local buttonCorner = Instance.new("UICorner", buttonFrame)
+			local buttonStroke = Instance.new("UIStroke", buttonFrame)
+			local iconImage1 = Instance.new("ImageLabel", buttonFrame)
+			local iconImage2 = Instance.new("ImageLabel", buttonFrame)
+			local buttonText = Instance.new("TextLabel", buttonFrame)
+			local buttonConstraint = Instance.new("UITextSizeConstraint", buttonText)
+			local buttonInstance = Instance.new("TextButton", buttonFrame)
+			
+			-- Set button properties
+			buttonFrame.Name = "Button"
+			buttonFrame.BackgroundColor3 = Color3.fromRGB(45, 40, 47)
+			buttonFrame.Size = UDim2.new(0.98, 0, 0, 64)
+			buttonFrame.LayoutOrder = tabOrder
+			
+			iconImage1.Name = "Icon"
+			iconImage1.BackgroundTransparency = 1
+			iconImage1.Position = UDim2.new(0, 0, 0.063, 0)
+			iconImage1.Size = UDim2.new(0.12, 0, 0.938, 0)
+			iconImage1.Image = "http://www.roblox.com/asset/?id=17487722188"
+			
+			iconImage2.Name = "Icon"
+			iconImage2.BackgroundTransparency = 1
+			iconImage2.Position = UDim2.new(0.884, 0, 0.063, 0)
+			iconImage2.Size = UDim2.new(0.12, 0, 0.938, 0)
+			iconImage2.Image = "http://www.roblox.com/asset/?id=17487722188"
+			
+			buttonText.Name = "Title"
+			buttonText.BackgroundTransparency = 1
+			buttonText.Position = UDim2.new(0.136, 0, 0.031, 0)
+			buttonText.Size = UDim2.new(0.748, 0, 1, 0)
+			buttonText.Text = buttonName
+			buttonText.TextColor3 = Color3.fromRGB(221, 212, 225)
+			buttonText.TextScaled = true
+			
+			buttonInstance.Name = "Button"
+			buttonInstance.BackgroundTransparency = 1
+			buttonInstance.Size = UDim2.new(1, 0, 1, 0)
+			buttonInstance.Text = ""
+			
+			buttonAspect.AspectRatio = 7.804
+			buttonCorner.CornerRadius = UDim.new(0.3, 0)
+			buttonStroke.Thickness = 4
+			buttonStroke.Color = Color3.fromRGB(21, 21, 21)
+			buttonConstraint.MaxTextSize = 35
+			buttonConstraint.MinTextSize = 1
+			
+			-- Button functionality
+			buttonInstance.MouseButton1Click:Connect(function()
+				pcall(callback)
+			end)
+			
+			-- Button functions
+			function button:Edit(newSettings)
+				newSettings = newSettings or {}
+				if newSettings.Name ~= nil then
+					buttonText.Text = newSettings.Name
+				end
+				
+				if newSettings.Callback ~= nil then
+					callback = newSettings.Callback
+				end
+			end
+			
+			function button:Remove()
+				buttonFrame:Destroy()
+			end
+			
+			return button
 		end
 		
 		return tab
@@ -327,6 +415,7 @@ function library:NewWindow(settings)
 	table.insert(library.Windows, window)
 	return window
 end
+
 
 
 return library
