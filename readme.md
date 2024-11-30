@@ -1,3 +1,12 @@
+# This Is Unfinished
+*this ui library was made only for me to use*
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+
+
 ```lua
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/lvvyh-Rblx/ui/refs/heads/main/lib.lua"))()
 ```
@@ -56,4 +65,7 @@ Button:Edit({
     end
 })
 Button:Remove() -- Removes the button
+
+<br/>
+*Made by: Lvvyh*
 ```
