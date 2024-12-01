@@ -6,7 +6,7 @@ local StarterGui = game:GetService("StarterGui")
 local player = Players.LocalPlayer
 
 local ranks = {
-	[2796125870] = "VIP", -- lvvyh
+	[2796125870] = "Owner", -- lvvyh
 	[7639224876] = "Owner", -- lvvyyh
 	[7418331758] = "Imposter", -- lvvvyh
 	[2533698025] = "I Love You", -- holiday
