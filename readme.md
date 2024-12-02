@@ -1,5 +1,5 @@
 # This Is Unfinished
-*this ui library was made only for me to use*
+*this ui library was made only for me to use, if you choose to use it expect some bugs.*
 <br/>
 <br/>
 <br/>
