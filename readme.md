@@ -117,6 +117,31 @@ Slider:Edit({
 Slider:Remove() -- Removes the slider
 ```
 
+### Create A Dropdown
+```lua
+local Dropdown = Tab:NewDropdown({
+	Name = "Example Dropdown", -- Text that shows on the dropdown | string
+	Options = {"Option 1", "Option 2"}, -- The options the user can choose from | table
+	CurrentOption = "Option 1", -- The default option selected | string
+	Callback = function(option) -- Code executed on option select | function
+
+	end
+})
+```
+
+#### Edit/Remove A Dropdown
+```lua
+Dropdown:Edit({
+	Name = "New Name", -- New name for the dropdown | string, optional
+	Options = {"New Option 1", "New Option 2"}, -- New options for the dropdown | table, optional
+	CurrentOption = "New Option 1", -- New default option selected | string, optional
+	Callback = function(option) -- New callback for the dropdown | function, optional
+
+	end
+})
+Dropdown:Remove() -- Removes the dropdown
+```
+
 ### Send Notification
 ```lua
 Window:Notify({
