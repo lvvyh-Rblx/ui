@@ -87,6 +87,34 @@ Toggle:Edit({
 		
 	end
 })
+Toggle:Remove() -- Removes the toggle
+```
+
+### Create A Slider
+```lua
+local Slider = Tab:NewSlider({
+	Name = "Example Slider", -- Text that shows on the slider | string
+	MinMax = {0, 100}, -- Minimum and maximum values of the slider | table
+	Increment = 1, -- The increment the slider increases by | number
+	CurrentValue = 0, -- The default value of the slider | number
+	Callback = function(newValue) -- Code executed on slider value change | function
+
+	end
+})
+```
+
+#### Edit/Remove A Slider
+```lua
+Slider:Edit({
+	Name = "Example Slider", -- New name for the slider | string, optional
+	MinMax = {0, 100}, -- New minimum and maximum values of the slider | table, optional
+	Increment = 1, -- New increment the slider increases by | number, optional
+	CurrentValue = 0, -- The new value of the slider | number, optional
+	Callback = function(newValue) -- New callback for the slider | function, optional
+
+	end
+})
+Slider:Remove() -- Removes the slider
 ```
 
 ### Send Notification
