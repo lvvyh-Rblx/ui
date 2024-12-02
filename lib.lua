@@ -27,6 +27,8 @@ function library:NewWindow(settings)
 	local minimized = false
 	local dragging = false
 	local dragInput, dragStart, startPos
+	local dropdownVisible = false
+	local dropdownSize = 0
 	
 	settings = settings or {}
 	for k, v in pairs(defaultSettings) do
@@ -130,6 +132,7 @@ function library:NewWindow(settings)
 	bar.Name = "Bar"
 	bar.Position = UDim2.new(0.255, 0, 0.221, 0)
 	bar.Size = UDim2.new(0.325, 0, 0.042, 0)
+	bar.BorderSizePixel = 0
 	
 	closeButton.Name = "Close"
 	closeButton.BackgroundColor3 = Color3.fromRGB(255, 17, 88)
@@ -347,20 +350,20 @@ function library:NewWindow(settings)
 		minButton.Visible = false
 		
 		if minimized then
-			TweenService:Create(windowFrame, TweenInfo.new(1, Enum.EasingStyle.Circular), {
+			TweenService:Create(windowFrame, TweenInfo.new(.8, Enum.EasingStyle.Circular), {
 				["Size"] = UDim2.new(windowFrame.Size.X.Scale, 0, 0.01, 0)
 			}):Play()
-			task.delay(.75, function()
+			task.delay(.5, function()
 				windowFrame.Visible = false
 			end)
 		else
 			windowFrame.Visible = true
-			TweenService:Create(windowFrame, TweenInfo.new(1, Enum.EasingStyle.Circular), {
+			TweenService:Create(windowFrame, TweenInfo.new(.8, Enum.EasingStyle.Circular), {
 				["Size"] = UDim2.new(windowFrame.Size.X.Scale, 0, .399, 0)
 			}):Play()
 		end
 		
-		task.wait(1.1)
+		task.wait(.9)
 		minButton.Visible = true
 	end)
 	
@@ -446,9 +449,10 @@ function library:NewWindow(settings)
 		tabWindowPadding.PaddingLeft = UDim.new(0.013, 0)
 		
 		-- Tab window canvas size updating
-		local function updateCanvasSize()
+		local function updateTabWindowCanvasSize()
 			local contentSize = tabWindowLayout.AbsoluteContentSize
-			tabWindow.CanvasSize = UDim2.new(0, contentSize.X, 0, contentSize.Y + 10)
+			local dropdownAdjustment = dropdownVisible and (dropdownSize + 10) or 0 -- Add 10px padding
+			tabWindow.CanvasSize = UDim2.new(0, contentSize.X, 0, contentSize.Y + dropdownAdjustment)
 		end
 
 		tabWindow.ChildAdded:Connect(updateCanvasSize)
@@ -857,6 +861,232 @@ function library:NewWindow(settings)
 			end
 			
 			return slider
+		end
+		
+		-- Dropdowns
+		function tab:NewDropdown(dropdownSettings)
+			tabOrder += 1
+			local dropdown = {}
+			local menuVisible = false
+			
+			dropdownSettings.Name = dropdownSettings.Name or "Dropdown"
+			dropdownSettings.Options = dropdownSettings.Options or {}
+			local currentOption = dropdownSettings.CurrentOption or "Select"
+			local callback = dropdownSettings.Callback or function() end
+			
+			-- Create dropdown instances
+			local dropdownFrame = Instance.new("Frame", tabWindow)
+			local dropdownAspect = Instance.new("UIAspectRatioConstraint", dropdownFrame)
+			local dropdownCorner = Instance.new("UICorner", dropdownFrame)
+			local dropdownStroke = Instance.new("UIStroke", dropdownFrame)
+			local dropdownDisplay = Instance.new("Frame", dropdownFrame)
+			local dropdownDisplayCorner = Instance.new("UICorner", dropdownDisplay)
+			local dropdownDisplayStroke = Instance.new("UIStroke", dropdownDisplay)
+			local dropdownDisplayArrow = Instance.new("ImageLabel", dropdownDisplay)
+			local dropdownDisplayButton = Instance.new("TextButton", dropdownDisplay)
+			local dropdownDisplayText = Instance.new("TextLabel", dropdownDisplay)
+			local dropdownDisplayTextConstraint = Instance.new("UITextSizeConstraint", dropdownDisplayText)
+			local dropdownMenu = Instance.new("Frame", dropdownFrame)
+			local dropdownMenuCorner = Instance.new("UICorner", dropdownMenu)
+			local dropdownMenuLayout = Instance.new("UIListLayout", dropdownMenu)
+			local dropdownMenuPadding = Instance.new("UIPadding", dropdownMenu)
+			local dropdownMenuStroke = Instance.new("UIStroke", dropdownMenu)
+			local dropdownText = Instance.new("TextLabel", dropdownFrame)
+			local dropdownTextConstraint = Instance.new("UITextSizeConstraint", dropdownText)
+			
+			-- Setup dropdown properties
+			dropdownFrame.Name = "Dropdown"
+			dropdownFrame.BackgroundColor3 = Color3.fromRGB(45, 40, 47)
+			dropdownFrame.Size = UDim2.new(0.975, 0, 0.155, 0)
+			dropdownFrame.LayoutOrder = tabOrder
+			dropdownFrame.ZIndex = 999
+			
+			dropdownDisplay.Name = "Display"
+			dropdownDisplay.BackgroundColor3 = Color3.fromRGB(62, 59, 63)
+			dropdownDisplay.Position = UDim2.new(0.54, 0, 0.135, 0)
+			dropdownDisplay.Size = UDim2.new(0.424, 0, 0.679, 0)
+			dropdownDisplay.ZIndex = 999
+			
+			dropdownDisplayArrow.Name = "Arrow"
+			dropdownDisplayArrow.Position = UDim2.new(0.85, 0, 0.245, 0)
+			dropdownDisplayArrow.Size = UDim2.new(0.067, 0, 0.419, 0)
+			dropdownDisplayArrow.BackgroundTransparency = 1
+			dropdownDisplayArrow.ImageColor3 = Color3.fromRGB(180, 180, 180)
+			dropdownDisplayArrow.Image = "rbxassetid://133724427527137"
+			dropdownDisplayArrow.ZIndex = 999
+			
+			dropdownDisplayButton.Name = "Button"
+			dropdownDisplayButton.BackgroundTransparency = 1
+			dropdownDisplayButton.Size = UDim2.new(1, 0, 1, 0)
+			dropdownDisplayButton.Text = ""
+			
+			dropdownDisplayText.Name = "Text"
+			dropdownDisplayText.BackgroundTransparency = 1
+			dropdownDisplayText.Position = UDim2.new(0.072, 0, 0, 0)
+			dropdownDisplayText.Size = UDim2.new(0.728, 0, 1, 0)
+			dropdownDisplayText.TextColor3 = Color3.fromRGB(150, 150, 150)
+			dropdownDisplayText.TextScaled = true
+			dropdownDisplayText.TextXAlignment = Enum.TextXAlignment.Left
+			dropdownDisplayText.Text = currentOption
+			dropdownDisplayText.ZIndex = 999
+			
+			dropdownMenu.Name = "Menu"
+			dropdownMenu.BackgroundColor3 = Color3.fromRGB(62, 59, 63)
+			dropdownMenu.Position = UDim2.new(0.539, 0, 0.999, 0)
+			dropdownMenu.Size = UDim2.new(0.42, 0, 1, 0)
+			dropdownMenu.Visible = menuVisible
+			dropdownMenu.ZIndex = 999
+			
+			dropdownText.Name = "Title"
+			dropdownText.BackgroundTransparency = 1
+			dropdownText.Position = UDim2.new(0.063, 0, 0, 0)
+			dropdownText.Size = UDim2.new(0.457, 0, 0.969, 0)
+			dropdownText.TextColor3 = Color3.fromRGB(221, 212, 225)
+			dropdownText.TextScaled = true
+			dropdownText.TextXAlignment = Enum.TextXAlignment.Left
+			dropdownText.Text = dropdownSettings.Name
+			dropdownText.ZIndex = 999
+			
+			dropdownAspect.AspectRatio = 8
+			dropdownCorner.CornerRadius = UDim.new(0.3, 0)
+			dropdownStroke.Color = Color3.fromRGB(33, 33, 33)
+			dropdownStroke.Thickness = 3
+			dropdownMenuCorner.CornerRadius = UDim.new(0, 6)
+			dropdownMenuLayout.Padding = UDim.new(0, 6)
+			dropdownMenuLayout.SortOrder = Enum.SortOrder.LayoutOrder
+			dropdownMenuPadding.PaddingLeft = UDim.new(0.03, 0)
+			dropdownMenuPadding.PaddingTop = UDim.new(0, 5)
+			dropdownMenuStroke.Color = Color3.fromRGB(39, 38, 40)
+			dropdownMenuStroke.Thickness = 3
+			dropdownDisplayCorner.CornerRadius = UDim.new(0.25, 0)
+			dropdownDisplayStroke.Color = Color3.fromRGB(38, 37, 39)
+			dropdownDisplayStroke.Thickness = 2
+			dropdownDisplayTextConstraint.MaxTextSize = 13
+			dropdownTextConstraint.MaxTextSize = 14
+			
+			-- Dropdown functionality
+			local function updateFrameSize()
+				local contentSize = dropdownMenuLayout.AbsoluteContentSize
+				dropdownMenu.Size = UDim2.new(dropdownMenu.Size.X.Scale, dropdownMenu.Size.X.Offset, 0, contentSize.Y + 10)
+			end
+
+			dropdownMenu.ChildAdded:Connect(updateFrameSize)
+			dropdownMenu.ChildRemoved:Connect(updateFrameSize)
+			dropdownMenuLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateFrameSize)
+			
+			local function removeOptions()
+				for _, option in pairs(dropdownMenu:GetChildren()) do
+					if option:IsA("Frame") then
+						option:Destroy()
+					end
+				end
+			end
+			
+			local function createOption(order, option)
+				-- Create option instances
+				local optionFrame = Instance.new("Frame", dropdownMenu)
+				local optionAspect = Instance.new("UIAspectRatioConstraint", optionFrame)
+				local optionFrameCorner = Instance.new("UICorner", optionFrame)
+				local optionFrameStroke = Instance.new("UIStroke", optionFrame)
+				local optionButton = Instance.new("TextButton", optionFrame)
+				local optionText = Instance.new("TextLabel", optionFrame)
+				local optionTextConstraint = Instance.new("UITextSizeConstraint", optionText)
+
+				-- Set option properties
+				optionFrame.Name = `Option{order}`
+				optionFrame.BackgroundColor3 = Color3.fromRGB(62, 59, 63)
+				optionFrame.Size = UDim2.new(.9705, 0, 0.337, 0)
+				optionFrame.ZIndex = 999
+
+				optionButton.Name = "Button"
+				optionButton.BackgroundTransparency = 1
+				optionButton.Size = UDim2.new(1, 0, 1, 0)
+				optionButton.Text = ""
+				optionButton.ZIndex = 999
+
+				optionText.Name = "Text"
+				optionText.BackgroundTransparency = 1
+				optionText.Position = UDim2.new(0.01, 0, 0.01, 0)
+				optionText.Size = UDim2.new(0.98, 0, 0.98, 0)
+				optionText.TextColor3 = Color3.fromRGB(175, 175, 175)
+				optionText.TextScaled = true
+				optionText.Text = option
+				optionText.ZIndex = 999
+				
+				optionFrameCorner.CornerRadius = UDim.new(0, 3)
+				optionFrameStroke.Color = Color3.fromRGB(39, 33, 40)
+				optionFrameStroke.Thickness = 2
+				optionTextConstraint.MaxTextSize = 14
+				optionAspect.AspectRatio = 6.14
+				
+				-- Option functionality
+				optionButton.MouseButton1Click:Connect(function()
+					currentOption = option
+					pcall(function()
+						callback(currentOption)
+					end)
+					
+					dropdownVisible = false
+					dropdownDisplayArrow.Image = "rbxassetid://133724427527137"
+					menuVisible = false
+					dropdownMenu.Visible = menuVisible
+					dropdownDisplayText.Text = currentOption
+					removeOptions()
+					updateTabWindowCanvasSize()
+				end)
+			end
+			
+			dropdownDisplayButton.MouseButton1Click:Connect(function()
+				menuVisible = not menuVisible
+				
+				if menuVisible == true then
+					dropdownVisible = true
+					dropdownDisplayArrow.Image = "rbxassetid://93046193105224"
+					
+					-- Load options					
+					for order, option in ipairs(dropdownSettings.Options) do
+						createOption(order, option)
+					end
+					
+					task.delay(.01, function()
+						dropdownSize = dropdownMenuLayout.AbsoluteContentSize.Y + 10
+						updateTabWindowCanvasSize()
+					end)
+					print((dropdownVisible and dropdownSize or 0))
+					
+				else
+					dropdownVisible = false
+					dropdownDisplayArrow.Image = "rbxassetid://133724427527137"
+					removeOptions()
+					updateTabWindowCanvasSize()
+				end
+				
+				dropdownMenu.Visible = menuVisible
+			end)
+			
+			-- Dropdown functions
+			function dropdown:Edit(newSettings)
+				newSettings = newSettings or {}
+				
+				dropdownSettings.Name = newSettings.Name or dropdownSettings.Name
+				dropdownSettings.Options = newSettings.Options or dropdownSettings.Options
+				currentOption = newSettings.CurrentOption or dropdownSettings.CurrentOption
+				callback = newSettings.Callback or dropdownSettings.Callback
+				
+				if newSettings.Name ~= nil then
+					dropdownText.Text = newSettings.Name
+				end
+				
+				if newSettings.CurrentOption ~= nil then
+					dropdownDisplayText.Text = newSettings.CurrentOption
+				end
+			end
+			
+			function dropdown:Remove()
+				dropdownFrame:Destroy()
+			end
+			
+			return dropdown
 		end
 		
 		return tab
