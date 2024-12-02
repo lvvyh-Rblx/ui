@@ -6,7 +6,7 @@ local StarterGui = game:GetService("StarterGui")
 local player = Players.LocalPlayer
 
 local ranks = {
-	[2796125870] = "Owner", -- lvvyh
+	[2796125870] = "VIP", -- lvvyh
 	[7639224876] = "Owner", -- lvvyyh
 	[7418331758] = "Imposter", -- lvvvyh
 	[2533698025] = "I Love You", -- holiday
@@ -182,6 +182,16 @@ function library:NewWindow(settings)
 	minCorner.CornerRadius = UDim.new(1, 0)
 	tabListLayout.Padding = UDim.new(0, 10)
 	tabListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	
+	-- Tab list canvas size updating
+	local function updateCanvasSize()
+		local contentSize = tabListLayout.AbsoluteContentSize
+		tabList.CanvasSize = UDim2.new(0, contentSize.X, 0, contentSize.Y + 10)
+	end
+
+	tabList.ChildAdded:Connect(updateCanvasSize)
+	tabList.ChildRemoved:Connect(updateCanvasSize)
+	tabListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateCanvasSize)
 	
 	-- Update rank text color
 	if ranks[player.UserId] ~= nil then
@@ -422,8 +432,7 @@ function library:NewWindow(settings)
 		tabWindow.Name = tabName
 		tabWindow.BackgroundTransparency = 1
 		tabWindow.Position = UDim2.new(0.293, 0, 0.135, 0)
-		tabWindow.Size = UDim2.new(0.698, 0, 0.865, 0)
-		tabWindow.AutomaticCanvasSize = Enum.AutomaticSize.Y
+		tabWindow.Size = UDim2.new(0.698, 0, 0.778, 0)
 		tabWindow.CanvasSize = UDim2.new(0, 0, 0.9, 0)
 		tabWindow.ScrollBarThickness = 0
 		tabWindow.Visible = false
@@ -435,6 +444,16 @@ function library:NewWindow(settings)
 		tabWindowLayout.Padding = UDim.new(0, 15)
 		tabWindowLayout.SortOrder = Enum.SortOrder.LayoutOrder
 		tabWindowPadding.PaddingLeft = UDim.new(0.013, 0)
+		
+		-- Tab window canvas size updating
+		local function updateCanvasSize()
+			local contentSize = tabWindowLayout.AbsoluteContentSize
+			tabWindow.CanvasSize = UDim2.new(0, contentSize.X, 0, contentSize.Y + 10)
+		end
+
+		tabWindow.ChildAdded:Connect(updateCanvasSize)
+		tabWindow.ChildRemoved:Connect(updateCanvasSize)
+		tabWindowLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateCanvasSize)
 		
 		-- Tab button functionality
 		tabButton.MouseButton1Click:Connect(function()
@@ -457,7 +476,7 @@ function library:NewWindow(settings)
 			tabTitle.Text = newName
 		end
 		
-		-- New label function
+		-- Labels
 		function tab:NewLabel(labelSettings)
 			tabOrder += 1
 			local label = {}
@@ -515,7 +534,7 @@ function library:NewWindow(settings)
 			return label
 		end
 		
-		-- New button function
+		-- Buttons
 		function tab:NewButton(buttonSettings)
 			tabOrder += 1
 			local button = {}
@@ -592,6 +611,7 @@ function library:NewWindow(settings)
 			return button
 		end
 		
+		-- Toggles
 		function tab:NewToggle(toggleSettings)
 			tabOrder += 1 
 			local toggle = {}
@@ -648,30 +668,37 @@ function library:NewWindow(settings)
 			toggleButton.MouseButton1Click:Connect(function()
 				currentState = not currentState
 				toggleBox.BackgroundColor3 = (currentState == true and Color3.fromRGB(16, 255, 104)) or Color3.fromRGB(255, 17, 88)
-				
-				pcall(function()
-					callback(currentState)
+
+				task.spawn(function()
+					pcall(function()
+						callback(currentState)
+					end)
 				end)
 			end)
 			
 			if toggleSettings.Default == true then
-				pcall(function()
-					callback(currentState)
+				task.spawn(function()
+					pcall(function()
+						callback(currentState)
+					end)
 				end)
 			end
 			
 			-- Toggle functions
 			function toggle:Edit(newSettings)
 				newSettings = newSettings or {}
+				
 				if newSettings.Name ~= nil then
 					toggleText.Text = newSettings.Name
 				end
 				
 				if newSettings.Enabled ~= nil then
 					toggleBox.BackgroundColor3 = (currentState == true and Color3.fromRGB(16, 255, 104)) or Color3.fromRGB(255, 17, 88)
-
-					pcall(function()
-						callback(currentState)
+					
+					task.spawn(function()
+						pcall(function()
+							callback(currentState)
+						end)
 					end)
 				end
 				
@@ -685,6 +712,151 @@ function library:NewWindow(settings)
 			end
 			
 			return toggle
+		end
+		
+		-- Sliders
+		function tab:NewSlider(sliderSettings)
+			tabOrder += 1
+			local slider = {}
+			local sliderDragging = false
+			local sliderDragInput
+			
+			sliderSettings = sliderSettings or {}
+			sliderSettings.Name = sliderSettings.Name or "Slider"
+			sliderSettings.MinMax = sliderSettings.MinMax or {0, 1}
+			sliderSettings.Increment = sliderSettings.Increment or 0.1
+			local value = sliderSettings.CurrentValue or 0
+			local callback = sliderSettings.Callback or function() end
+			local min, max = unpack(sliderSettings.MinMax)
+			local value = math.clamp(sliderSettings.CurrentValue or min, min, max)
+			local callback = sliderSettings.Callback or function() end
+			
+			-- Create slider instances
+			local sliderFrame = Instance.new("Frame", tabWindow)
+			local sliderAspect = Instance.new("UIAspectRatioConstraint", sliderFrame)
+			local sliderCorner = Instance.new("UICorner", sliderFrame)
+			local sliderStroke = Instance.new("UIStroke", sliderFrame)
+			local sliderBar = Instance.new("Frame", sliderFrame)
+			local sliderCircle = Instance.new("Frame", sliderBar)
+			local sliderCircleCorner = Instance.new("UICorner", sliderCircle)
+			local sliderDisplay = Instance.new("Frame", sliderFrame)
+			local sliderDisplayCorner = Instance.new("UICorner", sliderDisplay)
+			local sliderDisplayStroke = Instance.new("UIStroke", sliderDisplay)
+			local sliderDisplayText = Instance.new("TextLabel", sliderDisplay)
+			local sliderDisplayTextConstraint = Instance.new("UITextSizeConstraint", sliderDisplayText)
+			local sliderText = Instance.new("TextLabel", sliderFrame)
+			local sliderTextConstraint = Instance.new("UITextSizeConstraint", sliderText)
+			local sliderBox = Instance.new("Frame", sliderFrame)
+			
+			-- Set slider properties
+			sliderFrame.Name = "Slider"
+			sliderFrame.BackgroundColor3 = Color3.fromRGB(45, 40, 47)
+			sliderFrame.Size = UDim2.new(0.975, 0, 0.155, 0)
+			sliderFrame.LayoutOrder = tabOrder
+			
+			sliderBar.Name = "Bar"
+			sliderBar.BackgroundColor3 = Color3.fromRGB(104, 100, 109)
+			sliderBar.Position = UDim2.new(0.54, 0, 0.48, 0)
+			sliderBar.Size = UDim2.new(0.3, 0, 0.081, 0)
+			
+			sliderCircle.Name = "Circle"
+			sliderCircle.BackgroundColor3 = Color3.fromRGB(77, 73, 79)
+			sliderCircle.Position = UDim2.new(0, 0, -1.688, 0)
+			sliderCircle.Size = UDim2.new(0.129, 0, 4, 0)
+			
+			sliderDisplay.Name = "Display"
+			sliderDisplay.BackgroundColor3 = Color3.fromRGB(62, 59, 63)
+			sliderDisplay.Position = UDim2.new(0.88, 0, 0.135, 0)
+			sliderDisplay.Size = UDim2.new(0.085, 0, 0.679, 0)
+			
+			sliderDisplayText.Name = "DisplayText"
+			sliderDisplayText.BackgroundTransparency = 1
+			sliderDisplayText.Size = UDim2.new(1,0,1,0)
+			sliderDisplayText.TextColor3 = Color3.fromRGB(150, 150, 150)
+			sliderDisplayText.TextScaled = true
+			sliderDisplayText.Text = tostring(value)
+			
+			sliderText.Name = "Title"
+			sliderText.BackgroundTransparency = 1
+			sliderText.Position = UDim2.new(0.063, 0, 0.038, 0)
+			sliderText.Size = UDim2.new(0.457, 0, 0.969, 0)
+			sliderText.TextColor3 = Color3.fromRGB(221, 212, 225)
+			sliderText.TextScaled = true
+			sliderText.TextXAlignment = Enum.TextXAlignment.Left
+			sliderText.Text = sliderSettings.Name
+			
+			sliderBox.Name = "BarBox"
+			sliderBox.BackgroundTransparency = 1
+			sliderBox.Position = UDim2.new(0.54, 0, 0.25, 0)
+			sliderBox.Size = UDim2.new(0.316, 0, 0.5, 0)
+			
+			sliderAspect.AspectRatio = 8
+			sliderCorner.CornerRadius = UDim.new(0.3, 0)
+			sliderStroke.Color = Color3.fromRGB(33, 33, 33)
+			sliderStroke.Thickness = 3
+			sliderCircleCorner.CornerRadius = UDim.new(1, 0)
+			sliderDisplayCorner.CornerRadius = UDim.new(0.25, 0)
+			sliderDisplayStroke.Color = Color3.fromRGB(38, 37, 39)
+			sliderDisplayTextConstraint.MaxTextSize = 26
+			sliderTextConstraint.MaxTextSize = 14
+			
+			-- Slider functionality
+			local function sliderUpdate(input)
+				local sliderBarAbsPos = sliderBar.AbsolutePosition
+				local sliderBarAbsSize = sliderBar.AbsoluteSize
+				local normalizedValue = math.clamp((input.Position.X - sliderBarAbsPos.X) / sliderBarAbsSize.X, 0, 1)
+				value = math.clamp(min + normalizedValue * (max - min), min, max)
+				value = math.round(value / sliderSettings.Increment) * sliderSettings.Increment
+				sliderCircle.Position = UDim2.new(normalizedValue - 0.05, 0, -1.688, 0)
+				sliderDisplayText.Text = tostring(math.floor(value*100)/100)
+
+				pcall(callback, value)
+			end
+			
+			sliderBox.InputBegan:Connect(function(input)
+				if input.UserInputType == Enum.UserInputType.MouseButton1 then
+					sliderDragging = true
+					sliderUpdate(input)
+				end
+			end)
+
+			sliderBox.InputEnded:Connect(function(input)
+				if input.UserInputType == Enum.UserInputType.MouseButton1 then
+					sliderDragging = false
+				end
+			end)
+
+			UserInputService.InputChanged:Connect(function(input)
+				if sliderDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+					sliderUpdate(input)
+				end
+			end)
+			
+			-- Slider functions
+			function slider:Edit(newSettings)
+				newSettings = newSettings or {}
+				
+				sliderSettings.MinMax = newSettings.MinMax or sliderSettings.MinMax
+				sliderSettings.Increment = newSettings.Increment or sliderSettings.Increment
+				value = newSettings.CurrentValue or value
+				callback = newSettings.Callback or callback
+				
+				if newSettings.Name ~= nil then
+					sliderText.Text = newSettings.Name
+				end
+				
+				if newSettings.CurrentValue ~= nil then
+					sliderDisplayText.Text = tostring(math.floor(value*100)/100)
+				end
+				
+				min, max = unpack(sliderSettings.MinMax)
+			end
+			
+			function slider:Remove()
+				sliderFrame:Destroy()
+			end
+			
+			return slider
 		end
 		
 		return tab
